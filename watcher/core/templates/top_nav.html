@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="#">Watcher</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#topNav"
+      aria-controls="topNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="topNav">
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="topNavDatasetDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Datasets
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="topNavDatasetDropdown">
+            <li><a class="dropdown-item" href="/datasets/votes/">Votes</a></li>
+            <li><a class="dropdown-item" href="/datasets/vote_results/">Vote Results</a></li>
+            <li><a class="dropdown-item" href="/datasets/legislators/">Legislators</a></li>
+            <li><a class="dropdown-item" href="/datasets/bills/">Bills</a></li>
+            <li class="dropdown-divider"></li>
+            <li class="dropdown-item" href="#">Download all</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

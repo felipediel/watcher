@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <div class="pt-md-5 pb-md-4 mx-auto">
+        <h1>Vote Results</h1>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th>ID</th>
+            <th>Legislator ID</th>
+            <th>Vote ID</th>
+            <th>Vote Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for vote_result in page_obj %}
+          <tr>
+            <td>{{ vote_result.id }}</td>
+            <td>{{ vote_result.legislator_id }}</td>
+            <td>{{ vote_result.vote_id }}</td>
+            <td>{{ vote_result.vote_type.name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-md-6">{% include 'page_nav.html' %}</div>
+  </div>
+</div>
+{% endblock %}

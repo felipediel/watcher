@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <div class="pt-md-5 pb-md-4 mx-auto">
+        <h1>Legislators</h1>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for legislator in page_obj %}
+          <tr>
+            <td>{{ legislator.id }}</td>
+            <td>{{ legislator.name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-md-6">{% include 'page_nav.html' %}</div>
+  </div>
+</div>
+{% endblock %}
