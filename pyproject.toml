@@ -1,0 +1,11 @@
+[project]
+name = "watcher"
+description = "Watcher"
+dynamic = ["version"]
+authors = [{name="Felipe Martins Diel", email="felipemartinsdiel@gmail.com"}]
+dependencies = ["django"]
+
+[tool.black]
+target-version = ["py310"]
+exclude = 'generated'
+line-length = 79
