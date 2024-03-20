@@ -20,4 +20,12 @@ dataset_urls = [
     ),
 ]
 
-urlpatterns = [path("datasets/", include(dataset_urls))]
+summary_urls = [
+    path("legislators_votes/", LegislatorListView.as_view(), name="legislators-votes-list"),
+    path("bills_votes/", BillListView.as_view(), name="bills-votes-list"),
+]
+
+urlpatterns = [
+    path("summaries/", include(summary_urls)),
+    path("datasets/", include(dataset_urls)),
+]
