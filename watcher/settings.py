@@ -82,6 +82,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
 # Logging
 LOGGING = {
     "version": 1,
