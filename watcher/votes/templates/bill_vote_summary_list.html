@@ -3,8 +3,8 @@
 <div class="container">
   <div class="pt-md-5 pb-md-4 mx-auto">
     <h2>
-      Legislators
-      <small class="text-muted">Dataset</small>
+      Bills
+      <small class="text-muted">Vote Summary</small>
     </h2>
   </div>
   <div class="card mb-4">
@@ -23,14 +23,22 @@
         <thead class="thead-dark">
           <tr>
             <th>ID</th>
-            <th>Name</th>
+            <th>Title</th>
+            <th>Sponsor ID</th>
+            <th>Sponsor Name</th>
+            <th>Supporters</th>
+            <th>Opposers</th>
           </tr>
         </thead>
         <tbody>
-          {% for legislator in page_obj %}
+          {% for vote_summary in page_obj %}
           <tr>
-            <td>{{ legislator.id }}</td>
-            <td>{{ legislator.name }}</td>
+            <td>{{ vote_summary.bill_id }}</td>
+            <td>{{ vote_summary.bill_title }}</td>
+            <td>{{ vote_summary.sponsor_id }}</td>
+            <td>{{ vote_summary.sponsor_name }}</td>
+            <td>{{ vote_summary.supporters }}</td>
+            <td>{{ vote_summary.opposers }}</td>
           </tr>
           {% endfor %}
         </tbody>

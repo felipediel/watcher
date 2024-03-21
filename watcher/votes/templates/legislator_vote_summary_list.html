@@ -4,7 +4,7 @@
   <div class="pt-md-5 pb-md-4 mx-auto">
     <h2>
       Legislators
-      <small class="text-muted">Dataset</small>
+      <small class="text-muted">Vote Summary</small>
     </h2>
   </div>
   <div class="card mb-4">
@@ -24,13 +24,17 @@
           <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Supported Bills</th>
+            <th>Opposed Bills</th>
           </tr>
         </thead>
         <tbody>
-          {% for legislator in page_obj %}
+          {% for vote_summary in page_obj %}
           <tr>
-            <td>{{ legislator.id }}</td>
-            <td>{{ legislator.name }}</td>
+            <td>{{ vote_summary.legislator_id }}</td>
+            <td>{{ vote_summary.legislator_name }}</td>
+            <td>{{ vote_summary.supported_bills }}</td>
+            <td>{{ vote_summary.opposed_bills }}</td>
           </tr>
           {% endfor %}
         </tbody>

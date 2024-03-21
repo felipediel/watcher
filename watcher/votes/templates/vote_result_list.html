@@ -1,15 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container">
-  <div class="row">
-    <div class="col">
-      <div class="pt-md-5 pb-md-4 mx-auto">
-        <h1>Vote Results</h1>
+  <div class="pt-md-5 pb-md-4 mx-auto">
+    <h2>
+      Vote Results
+      <small class="text-muted">Dataset</small>
+    </h2>
+  </div>
+  <div class="card mb-4">
+    <div class="card-header">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search...">
+            <button class="btn btn-outline-secondary" type="button">Search</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col">
+    <div class="card-body">
       <table class="table table-striped">
         <thead class="thead-dark">
           <tr>
@@ -31,10 +40,9 @@
         </tbody>
       </table>
     </div>
-  </div>
-
-  <div class="row justify-content-center">
-    <div class="col-md-6">{% include 'page_nav.html' %}</div>
+    <div class="card-footer">
+      <div class="col">{% include 'page_nav.html' %}</div>
+    </div>
   </div>
 </div>
 {% endblock %}

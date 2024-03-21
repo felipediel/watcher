@@ -4,7 +4,9 @@ from django.urls import path, include
 
 from .views import (
     BillListView,
+    BillVoteSummaryListView,
     LegislatorListView,
+    LegislatorVoteSummaryListView,
     VoteListView,
     VoteResultListView,
 )
@@ -21,8 +23,16 @@ dataset_urls = [
 ]
 
 summary_urls = [
-    path("legislators_votes/", LegislatorListView.as_view(), name="legislators-votes-list"),
-    path("bills_votes/", BillListView.as_view(), name="bills-votes-list"),
+    path(
+        "legislators_votes/",
+        LegislatorVoteSummaryListView.as_view(),
+        name="legislator-vote-summary-list",
+    ),
+    path(
+        "bills_votes/",
+        BillVoteSummaryListView.as_view(),
+        name="bill-vote-summary-list",
+    ),
 ]
 
 urlpatterns = [
