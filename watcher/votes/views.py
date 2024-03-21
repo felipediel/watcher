@@ -1,5 +1,6 @@
 """Views."""
 
+from django.conf import settings
 from django.views.generic import ListView
 
 from watcher.core.views import RepositoryListView
@@ -17,32 +18,48 @@ class LegislatorListView(RepositoryListView):
     """Legislator list view."""
 
     paginate_by = 15
-    repository_cls = LegislatorCsvRepository
+    repository_class = LegislatorCsvRepository
     template_name = "legislator_list.html"
+
+    def get_repository_config(self) -> dict:
+        """Get repository config."""
+        return {"file_path": settings.MEDIA_FILES["legislators"]}
 
 
 class BillListView(RepositoryListView):
     """Bill list view."""
 
     paginate_by = 15
-    repository_cls = BillCsvRepository
+    repository_class = BillCsvRepository
     template_name = "bill_list.html"
+
+    def get_repository_config(self) -> dict:
+        """Get repository config."""
+        return {"file_path": settings.MEDIA_FILES["bills"]}
 
 
 class VoteListView(RepositoryListView):
     """Vote list view."""
 
     paginate_by = 15
-    repository_cls = VoteCsvRepository
+    repository_class = VoteCsvRepository
     template_name = "vote_list.html"
+
+    def get_repository_config(self) -> dict:
+        """Get repository config."""
+        return {"file_path": settings.MEDIA_FILES["votes"]}
 
 
 class VoteResultListView(RepositoryListView):
     """Vote result list view."""
 
     paginate_by = 15
-    repository_cls = VoteResultCsvRepository
+    repository_class = VoteResultCsvRepository
     template_name = "vote_result_list.html"
+
+    def get_repository_config(self) -> dict:
+        """Get repository config."""
+        return {"file_path": settings.MEDIA_FILES["vote_results"]}
 
 
 class LegislatorVoteSummaryListView(ListView):
@@ -53,8 +70,12 @@ class LegislatorVoteSummaryListView(ListView):
 
     def get_queryset(self):
         """Get queryset."""
-        vote_result_repository = VoteResultCsvRepository()
-        legislator_repository = LegislatorCsvRepository()
+        vote_result_repository = VoteResultCsvRepository.using(
+            file_path=settings.MEDIA_FILES["vote_results"]
+        )
+        legislator_repository = LegislatorCsvRepository.using(
+            file_path=settings.MEDIA_FILES["legislators"]
+        )
         service = LegislatorVoteSummaryService()
 
         vote_summary = service.summarize_votes(
@@ -72,10 +93,18 @@ class BillVoteSummaryListView(ListView):
 
     def get_queryset(self):
         """Get queryset."""
-        vote_repository = VoteCsvRepository()
-        vote_result_repository = VoteResultCsvRepository()
-        bill_repository = BillCsvRepository()
-        legislator_repository = LegislatorCsvRepository()
+        vote_repository = VoteCsvRepository.using(
+            file_path=settings.MEDIA_FILES["votes"]
+        )
+        vote_result_repository = VoteResultCsvRepository.using(
+            file_path=settings.MEDIA_FILES["vote_results"]
+        )
+        bill_repository = BillCsvRepository.using(
+            file_path=settings.MEDIA_FILES["bills"]
+        )
+        legislator_repository = LegislatorCsvRepository.using(
+            file_path=settings.MEDIA_FILES["legislators"]
+        )
         service = BillVoteSummaryService()
 
         bill_vote_summary = service.summarize_votes(

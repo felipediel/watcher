@@ -1,8 +1,10 @@
 """Repositories."""
 
+from __future__ import annotations
+
 import abc
 import csv
-from typing import Generator, Generic, Mapping, TypeVar
+from typing import Generator, Generic, TypeVar
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
@@ -12,24 +14,13 @@ from .specifications import EqualsSpecification, Specification
 T = TypeVar("T")
 
 
-class Repository(Generic[T]):
-    """Repository."""
-
-    def __init__(self, context: Mapping | None = None) -> None:
-        """Initialize repository."""
-        if context is None:
-            context = {}
-        elif not (
-            callable(getattr(context, "keys", None))
-            and callable(getattr(context, "__getitem__", None))
-        ):
-            raise ValueError("'context' must be a mapping or None.")
-
-        self.context: Mapping = context
-
-
-class ReadRepository(Repository[T], abc.ABC):
+class ReadRepository(abc.ABC, Generic[T]):
     """Read repository."""
+
+    @classmethod
+    @abc.abstractmethod
+    def using(cls, **_) -> ReadRepository:
+        """Build repository from config params."""
 
     @abc.abstractmethod
     def get_by_id(self, pk: int) -> T:
@@ -44,38 +35,16 @@ class ReadRepository(Repository[T], abc.ABC):
         """Get dict of items with their primary keys as indices."""
 
 
-class ReadCsvRepository(ReadRepository[T]):
-    """Read CSV repository."""
+class IterableReadRepository(ReadRepository[T]):
+    """Iterable read repository."""
 
     pk_field: str = "id"
-    default_file_path: str | None = None
-
-    def __init__(self, context: Mapping | None = None) -> None:
-        """Initialize repository."""
-        super().__init__(context)
-        file_path = self.context.get("file_path") or self.default_file_path
-        if not file_path:
-            raise ValueError("No 'file_path' provided.")
-        self.file_path = file_path
 
     @abc.abstractmethod
-    def _build_item(self, row: dict) -> T:
-        """Build item from dict."""
-
     def iter_items(
         self, spec: Specification | None = None
     ) -> Generator[T, None, None]:
-        """Generate items from storage, optionally filtered by a specification."""
-        with default_storage.open(self.file_path, mode="r") as file:
-            reader = csv.DictReader(file)
-
-            for item_data in reader:
-                item = self._build_item(item_data)
-
-                if spec and not spec.is_satisfied_by(item):
-                    continue
-
-                yield item
+        """Generate items, optionally filtered by a specification."""
 
     def get_by_id(self, pk: int) -> T:
         """Get item by primary key."""
@@ -95,3 +64,44 @@ class ReadCsvRepository(ReadRepository[T]):
             getattr(item, self.pk_field): item
             for item in self.iter_items(spec)
         }
+
+
+class CsvReadRepository(IterableReadRepository[T]):
+    """CSV read repository."""
+
+    pk_field: str = "id"
+
+    def __init__(self, file_path: str) -> None:
+        """Initialize repository."""
+        self._file_path = file_path
+
+    @property
+    def file_path(self):
+        """Return file path."""
+        return self._file_path
+
+    @classmethod
+    def using(cls, file_path: str | None = None, **_) -> ReadRepository:
+        """Build repository from config params."""
+        if not file_path:
+            raise ValueError("No file path provided.")
+        return cls(file_path)
+
+    @abc.abstractmethod
+    def build_item(self, data: dict) -> T:
+        """Build item from dict."""
+
+    def iter_items(
+        self, spec: Specification | None = None
+    ) -> Generator[T, None, None]:
+        """Generate items, optionally filtered by a specification."""
+        with default_storage.open(self.file_path, mode="r") as file:
+            reader = csv.DictReader(file)
+
+            for item_data in reader:
+                item = self.build_item(item_data)
+
+                if spec and not spec.is_satisfied_by(item):
+                    continue
+
+                yield item

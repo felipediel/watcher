@@ -150,11 +150,13 @@ STATICFILES_DIRS = []
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_FILES = {
+    "bills": "csv/bills.csv",
+    "legislators": "csv/legislators.csv",
+    "votes": "csv/votes.csv",
+    "vote_results": "csv/vote_results.csv",
+}
 
-BILLS_CSV = "csv/bills.csv"
-LEGISLATORS_CSV = "csv/legislators.csv"
-VOTES_CSV = "csv/votes.csv"
-VOTE_RESULTS_CSV = "csv/vote_results.csv"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
