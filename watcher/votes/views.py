@@ -1,10 +1,19 @@
 """Views."""
 
+from typing import Any
+
 from django.conf import settings
 from django.views.generic import ListView
 
+from watcher.core.specifications import AndSpecificationBuilder
 from watcher.core.views import RepositoryListView
 
+from .schemas import (
+    BillQueryParams,
+    PersonQueryParams,
+    VoteQueryParams,
+    VoteResultQueryParams,
+)
 from .services import BillVoteSummaryService, LegislatorVoteSummaryService
 from .repositories import (
     BillCsvRepository,
@@ -19,11 +28,16 @@ class LegislatorListView(RepositoryListView):
 
     paginate_by = 15
     repository_class = LegislatorCsvRepository
+    spec_builder_class = AndSpecificationBuilder
     template_name = "legislator_list.html"
 
-    def get_repository_config(self) -> dict:
+    def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
         return {"file_path": settings.MEDIA_FILES["legislators"]}
+
+    def get_query_params(self) -> dict[str, Any]:
+        """Get query parameters."""
+        return PersonQueryParams(**self.request.GET).model_dump()
 
 
 class BillListView(RepositoryListView):
@@ -31,11 +45,16 @@ class BillListView(RepositoryListView):
 
     paginate_by = 15
     repository_class = BillCsvRepository
+    spec_builder_class = AndSpecificationBuilder
     template_name = "bill_list.html"
 
-    def get_repository_config(self) -> dict:
+    def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
         return {"file_path": settings.MEDIA_FILES["bills"]}
+
+    def get_query_params(self) -> dict[str, Any]:
+        """Get query parameters."""
+        return BillQueryParams(**self.request.GET).model_dump()
 
 
 class VoteListView(RepositoryListView):
@@ -43,11 +62,16 @@ class VoteListView(RepositoryListView):
 
     paginate_by = 15
     repository_class = VoteCsvRepository
+    spec_builder_class = AndSpecificationBuilder
     template_name = "vote_list.html"
 
-    def get_repository_config(self) -> dict:
+    def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
         return {"file_path": settings.MEDIA_FILES["votes"]}
+
+    def get_query_params(self) -> dict[str, Any]:
+        """Get query parameters."""
+        return VoteQueryParams(**self.request.GET).model_dump()
 
 
 class VoteResultListView(RepositoryListView):
@@ -55,11 +79,16 @@ class VoteResultListView(RepositoryListView):
 
     paginate_by = 15
     repository_class = VoteResultCsvRepository
+    spec_builder_class = AndSpecificationBuilder
     template_name = "vote_result_list.html"
 
-    def get_repository_config(self) -> dict:
+    def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
         return {"file_path": settings.MEDIA_FILES["vote_results"]}
+
+    def get_query_params(self) -> dict[str, Any]:
+        """Get query parameters."""
+        return VoteResultQueryParams(**self.request.GET).model_dump()
 
 
 class LegislatorVoteSummaryListView(ListView):
