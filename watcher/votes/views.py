@@ -5,6 +5,7 @@ from typing import Any
 from django.conf import settings
 from django.views.generic import ListView
 
+from watcher.core.forms import SearchForm
 from watcher.core.specifications import (
     FieldSpecificationBackend,
     SearchSpecificationBackend,
@@ -30,13 +31,18 @@ class LegislatorListView(RepositoryListView):
     """Legislator list view."""
 
     paginate_by = 15
+    form_class = SearchForm
     repository_class = LegislatorCsvRepository
     specification_backends = [
         FieldSpecificationBackend,
         SearchSpecificationBackend,
     ]
     template_name = "legislator_list.html"
-    search_fields = {"id": int, "name": str}
+    search_fields = {
+        "id": int,
+        "name": str,
+        "name__contains": str,
+    }
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
@@ -51,13 +57,19 @@ class BillListView(RepositoryListView):
     """Bill list view."""
 
     paginate_by = 15
+    form_class = SearchForm
     repository_class = BillCsvRepository
     specification_backends = [
         FieldSpecificationBackend,
         SearchSpecificationBackend,
     ]
     template_name = "bill_list.html"
-    search_fields = {"id": int, "title": str, "sponsor_id": int}
+    search_fields = {
+        "id": int,
+        "title": str,
+        "title__contains": str,
+        "sponsor_id": int,
+    }
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
@@ -72,6 +84,7 @@ class VoteListView(RepositoryListView):
     """Vote list view."""
 
     paginate_by = 15
+    form_class = SearchForm
     repository_class = VoteCsvRepository
     specification_backends = [
         FieldSpecificationBackend,
@@ -93,6 +106,7 @@ class VoteResultListView(RepositoryListView):
     """Vote result list view."""
 
     paginate_by = 15
+    form_class = SearchForm
     repository_class = VoteResultCsvRepository
     specification_backends = [
         FieldSpecificationBackend,

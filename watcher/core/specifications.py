@@ -1,6 +1,7 @@
 """Specifications."""
 
 import abc
+from contextlib import suppress
 from typing import Any, Generator, Iterable, Mapping
 
 from django.core.exceptions import ImproperlyConfigured
@@ -56,6 +57,24 @@ class InSpecification(Specification):
         return getattr(obj, self.field) in self.value
 
 
+class ContainsSpecification(Specification):
+    """Contains specification.
+
+    Specification that checks if an object contains a value.
+    """
+
+    __slots__ = ["field", "value"]
+
+    def __init__(self, field: str, value: Iterable[Any]) -> None:
+        """Initialize specification."""
+        self.field = field
+        self.value = value
+
+    def is_satisfied_by(self, obj: Any) -> bool:
+        """Check if the given object satisfies the specification."""
+        return self.value in getattr(obj, self.field)
+
+
 class AndSpecification(Specification):
     """And specification.
 
@@ -90,22 +109,38 @@ class OrSpecification(Specification):
         return any(spec.is_satisfied_by(obj) for spec in self.specs)
 
 
-class SpecificationBuilder(abc.ABC):
-    """Specification builder."""
+class AtomicSpecificationBuilder(abc.ABC):
+    """Atomic specification builder."""
+
+    @abc.abstractmethod
+    def build(self, field_name: str, value: Any) -> Specification:
+        """Build specification for a given field."""
+
+
+class FieldSpecificationBuilder(AtomicSpecificationBuilder):
+    """Field specification builder."""
+
+    def build(self, field_name: str, value: Any) -> Specification:
+        """Build specification for a given field."""
+        if field_name.endswith("__in"):
+            return InSpecification(field_name.rstrip("__in"), value)
+        if field_name.endswith("__contains"):
+            return ContainsSpecification(
+                field_name.rstrip("__contains"), value
+            )
+        return EqualsSpecification(field_name, value)
+
+
+class CompositeSpecificationBuilder(abc.ABC):
+    """Composite specification builder."""
+
+    def __init__(self, spec_builder: AtomicSpecificationBuilder):
+        """Initialize composite specification builder."""
+        self.spec_builder = spec_builder
 
     @abc.abstractmethod
     def build(self, params: Mapping[str, Any]) -> Specification:
         """Build specification for a field-value mapping."""
-
-    def _build_field_spec(self, field_name: str, value: Any) -> Specification:
-        """Build specification for a field name and value."""
-        if field_name.endswith("__in"):
-            return InSpecification(field_name, value)
-        return EqualsSpecification(field_name, value)
-
-
-class CompositeSpecificationBuilder(SpecificationBuilder):
-    """Composite specification builder."""
 
     def _iter_specs(
         self, params: Mapping[str, Any]
@@ -117,10 +152,10 @@ class CompositeSpecificationBuilder(SpecificationBuilder):
 
             if isinstance(value, list):
                 for field_value in value:
-                    spec = self._build_field_spec(field_name, field_value)
+                    spec = self.spec_builder.build(field_name, field_value)
                     yield spec
             else:
-                spec = self._build_field_spec(field_name, value)
+                spec = self.spec_builder.build(field_name, value)
                 yield spec
 
 
@@ -148,6 +183,7 @@ class SpecificationBackend:
 
 
 class FieldSpecificationBackend:
+    """Field specification backend."""
 
     def build(self, request: HttpRequest, view: View) -> Specification:
         """Build specification for a request."""
@@ -161,11 +197,13 @@ class FieldSpecificationBackend:
         if not params:
             return None
 
-        spec_builder = AndSpecificationBuilder()
-        return spec_builder.build(params)
+        field_spec_builder = FieldSpecificationBuilder()
+        and_spec_builder = AndSpecificationBuilder(field_spec_builder)
+        return and_spec_builder.build(params)
 
 
 class SearchSpecificationBackend:
+    """Search specification backend."""
     
     def build(self, request: HttpRequest, view: View) -> Specification:
         """Build specification for a request."""
@@ -182,12 +220,20 @@ class SearchSpecificationBackend:
 
         params: dict[str, Any] = {}
         for field, field_type in search_fields.items():
-            field_lookup = params.setdefault(field, [])
+            field_lookup_list = params.setdefault(field, [])
             if isinstance(search, list):
                 for value in search:
-                    field_lookup.append(field_type(value))
+                    value = self._cast_type(value, field_type)
+                    field_lookup_list.append(value)
             else:
-                field_lookup.append(field_type(search))
+                value = self._cast_type(search, field_type)
+                field_lookup_list.append(value)
 
-        spec_builder = OrSpecificationBuilder()
-        return spec_builder.build(params)
+        field_spec_builder = FieldSpecificationBuilder()
+        or_spec_builder = OrSpecificationBuilder(field_spec_builder)
+        return or_spec_builder.build(params)
+
+    def _cast_type(self, value: Any, field_type: Any) -> Any:
+        """Cast lookup value to field type."""
+        with suppress(ValueError, TypeError):
+            return field_type(value)
