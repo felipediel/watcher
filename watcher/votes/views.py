@@ -1,9 +1,14 @@
 """Views."""
 
+import io
+import os
+import zipfile
 from typing import Any
 
 from django.conf import settings
-from django.views.generic import ListView
+from django.core.files.storage import default_storage
+from django.http import FileResponse
+from django.views.generic import ListView, View
 
 from watcher.core.forms import SearchForm
 from watcher.core.specifications import (
@@ -232,3 +237,27 @@ class BillVoteSummaryListView(SpecificationMixin, ListView):
     def get_query_params(self) -> dict[str, Any]:
         """Get query parameters."""
         return BillVoteSummaryQueryParams(**self.request.GET).model_dump()
+
+
+class DownloadAllView(View):
+    """Download all files."""
+
+    def get(self, request, *args, **kwargs):
+        files_to_zip = [
+            settings.MEDIA_FILES["bills"],
+            settings.MEDIA_FILES["votes"],
+            settings.MEDIA_FILES["vote_results"],
+            settings.MEDIA_FILES["legislators"],
+        ]
+        zip_filename = "datasets.zip"
+        stream = io.BytesIO()
+
+        with zipfile.ZipFile(stream, "w", zipfile.ZIP_DEFLATED, False) as zf:
+            for filename in files_to_zip:
+                with default_storage.open(filename, "r") as file:
+                    zf.writestr(os.path.basename(filename), file.read())
+
+        stream.seek(0)
+        response = FileResponse(stream, content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+        return response
