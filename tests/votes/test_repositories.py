@@ -20,8 +20,8 @@ class TestLegislatorCsvRepository(BaseTestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.file_path = "csv/legislators.csv"
-        self.repository = LegislatorCsvRepository(self.file_path)
+        file_path = "csv/legislators_sm.csv"
+        self.repository = LegislatorCsvRepository(file_path)
 
     def test_build_item(self):
         """Test build item."""
@@ -85,8 +85,8 @@ class TestBillCsvRepository(BaseTestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.file_path = "csv/bills.csv"
-        self.repository = BillCsvRepository(self.file_path)
+        file_path = "csv/bills_sm.csv"
+        self.repository = BillCsvRepository(file_path)
 
     def test_build_item(self):
         """Test build item."""
@@ -158,8 +158,8 @@ class TestVoteCsvRepository(BaseTestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.file_path = "csv/votes.csv"
-        self.repository = VoteCsvRepository(self.file_path)
+        file_path = "csv/votes_sm.csv"
+        self.repository = VoteCsvRepository(file_path)
 
     def test_build_item(self):
         """Test build item."""
@@ -223,8 +223,8 @@ class TestVoteResultCsvRepository(BaseTestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.file_path = "csv/vote_results.csv"
-        self.repository = VoteResultCsvRepository(self.file_path)
+        file_path = "csv/vote_results_sm.csv"
+        self.repository = VoteResultCsvRepository(file_path)
 
     def test_build_item(self):
         """Test build item."""

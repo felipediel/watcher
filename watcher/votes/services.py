@@ -20,16 +20,22 @@ _LOGGER = logging.getLogger(__name__)
 class LegislatorVoteSummaryService:
     """Legislator vote summary service."""
 
-    def summarize_votes(
+    def __init__(
         self,
-        vote_result_repository: ReadRepository[VoteResult],
         vote_repository: ReadRepository[Vote],
+        vote_result_repository: ReadRepository[VoteResult],
         legislator_repository: ReadRepository[Person],
-    ) -> list[LegislatorVoteSummary]:
+    ) -> None:
+        """Initialize service."""
+        self.vote_repository = vote_repository
+        self.vote_result_repository = vote_result_repository
+        self.legislator_repository = legislator_repository
+
+    def summarize_votes(self) -> list[LegislatorVoteSummary]:
         """Summarize vote results into legislator vote summary list."""
-        vote_result_list = vote_result_repository.get_all()
-        vote_dict = vote_repository.get_dict()
-        legislator_dict = legislator_repository.get_dict()
+        vote_result_list = self.vote_result_repository.get_all()
+        vote_dict = self.vote_repository.get_dict()
+        legislator_dict = self.legislator_repository.get_dict()
         legislator_vote_dict: dict[int, tuple[set[int], set[int]]] = {}
         vote_summary_list: list[LegislatorVoteSummary] = []
 
@@ -74,19 +80,26 @@ class LegislatorVoteSummaryService:
 class BillVoteSummaryService:
     """Bill vote summary service."""
 
-    def summarize_votes(
+    def __init__(
         self,
         vote_repository: ReadRepository[Vote],
         vote_result_repository: ReadRepository[VoteResult],
         bill_repository: ReadRepository[Bill],
         legislator_repository: ReadRepository[Person],
-    ) -> list[BillVoteSummary]:
+    ) -> None:
+        """Initialize service."""
+        self.vote_repository = vote_repository
+        self.vote_result_repository = vote_result_repository
+        self.bill_repository = bill_repository
+        self.legislator_repository = legislator_repository
+
+    def summarize_votes(self) -> list[BillVoteSummary]:
         """Summarize vote results into bill vote summary list."""
         vote_summary_dict: dict[int, BillVoteSummary] = {}
-        vote_dict = vote_repository.get_dict()
-        vote_result_list = vote_result_repository.get_all()
-        bill_dict = bill_repository.get_dict()
-        legislator_dict = legislator_repository.get_dict()
+        vote_dict = self.vote_repository.get_dict()
+        vote_result_list = self.vote_result_repository.get_all()
+        bill_dict = self.bill_repository.get_dict()
+        legislator_dict = self.legislator_repository.get_dict()
 
         for vote_result in vote_result_list:
             try:

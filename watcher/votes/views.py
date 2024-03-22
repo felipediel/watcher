@@ -146,13 +146,12 @@ class LegislatorVoteSummaryListView(ListView):
         legislator_repository = LegislatorCsvRepository.using(
             file_path=settings.MEDIA_FILES["legislators"]
         )
-        service = LegislatorVoteSummaryService()
-
-        vote_summary = service.summarize_votes(
-            vote_result_repository=vote_result_repository,
+        service = LegislatorVoteSummaryService(
             vote_repository=vote_repository,
+            vote_result_repository=vote_result_repository,
             legislator_repository=legislator_repository,
         )
+        vote_summary = service.summarize_votes()
         return vote_summary
 
 
@@ -176,12 +175,11 @@ class BillVoteSummaryListView(ListView):
         legislator_repository = LegislatorCsvRepository.using(
             file_path=settings.MEDIA_FILES["legislators"]
         )
-        service = BillVoteSummaryService()
-
-        bill_vote_summary = service.summarize_votes(
+        service = BillVoteSummaryService(
             vote_repository=vote_repository,
             vote_result_repository=vote_result_repository,
             bill_repository=bill_repository,
             legislator_repository=legislator_repository,
         )
+        bill_vote_summary = service.summarize_votes()
         return bill_vote_summary
