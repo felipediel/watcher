@@ -10,10 +10,12 @@ from watcher.core.specifications import (
     FieldSpecificationBackend,
     SearchSpecificationBackend,
 )
-from watcher.core.views import RepositoryListView
+from watcher.core.views import RepositoryListView, SpecificationMixin
 
 from .schemas import (
     BillQueryParams,
+    BillVoteSummaryQueryParams,
+    LegislatorVoteSummaryQueryParams,
     PersonQueryParams,
     VoteQueryParams,
     VoteResultQueryParams,
@@ -30,19 +32,19 @@ from .repositories import (
 class LegislatorListView(RepositoryListView):
     """Legislator list view."""
 
-    paginate_by = 15
+    template_name = "legislator_list.html"
     form_class = SearchForm
     repository_class = LegislatorCsvRepository
     specification_backends = [
         FieldSpecificationBackend,
         SearchSpecificationBackend,
     ]
-    template_name = "legislator_list.html"
     search_fields = {
         "id": int,
         "name": str,
         "name__contains": str,
     }
+    paginate_by = 15
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
@@ -56,20 +58,20 @@ class LegislatorListView(RepositoryListView):
 class BillListView(RepositoryListView):
     """Bill list view."""
 
-    paginate_by = 15
+    template_name = "bill_list.html"
     form_class = SearchForm
     repository_class = BillCsvRepository
     specification_backends = [
         FieldSpecificationBackend,
         SearchSpecificationBackend,
     ]
-    template_name = "bill_list.html"
     search_fields = {
         "id": int,
         "title": str,
         "title__contains": str,
         "sponsor_id": int,
     }
+    paginate_by = 15
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
@@ -83,15 +85,15 @@ class BillListView(RepositoryListView):
 class VoteListView(RepositoryListView):
     """Vote list view."""
 
-    paginate_by = 15
+    template_name = "vote_list.html"
     form_class = SearchForm
     repository_class = VoteCsvRepository
     specification_backends = [
         FieldSpecificationBackend,
         SearchSpecificationBackend,
     ]
-    template_name = "vote_list.html"
     search_fields = {"id": int, "bill_id": int}
+    paginate_by = 15
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
@@ -105,20 +107,20 @@ class VoteListView(RepositoryListView):
 class VoteResultListView(RepositoryListView):
     """Vote result list view."""
 
-    paginate_by = 15
+    template_name = "vote_result_list.html"
     form_class = SearchForm
     repository_class = VoteResultCsvRepository
     specification_backends = [
         FieldSpecificationBackend,
         SearchSpecificationBackend,
     ]
-    template_name = "vote_result_list.html"
     search_fields = {
         "id": int,
         "legislator_id": int,
         "vote_id": int,
         "vote_type": int,
     }
+    paginate_by = 15
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
@@ -129,16 +131,29 @@ class VoteResultListView(RepositoryListView):
         return VoteResultQueryParams(**self.request.GET).model_dump()
 
 
-class LegislatorVoteSummaryListView(ListView):
+class LegislatorVoteSummaryListView(SpecificationMixin, ListView):
     """Legislator vote summary list view."""
 
-    paginate_by = 15
     template_name = "legislator_vote_summary_list.html"
+    form_class = SearchForm
+    specification_backends = [
+        FieldSpecificationBackend,
+        SearchSpecificationBackend,
+    ]
+    search_fields = {
+        "legislator_id": int,
+        "legislator_name": str,
+        "legislator_name__contains": str,
+        "supported_bills": int,
+        "opposed_bills": int,
+    }
+    paginate_by = 15
 
     def get_queryset(self):
         """Get queryset."""
         service = self.get_service()
-        vote_summary = service.summarize_votes()
+        spec = self.get_specification()
+        vote_summary = service.summarize_votes(spec)
         return vote_summary
 
     def get_service(self) -> LegislatorVoteSummaryService:
@@ -159,17 +174,37 @@ class LegislatorVoteSummaryListView(ListView):
         )
         return service
 
+    def get_query_params(self) -> dict[str, Any]:
+        """Get query parameters."""
+        return LegislatorVoteSummaryQueryParams(
+            **self.request.GET
+        ).model_dump()
 
-class BillVoteSummaryListView(ListView):
+
+class BillVoteSummaryListView(SpecificationMixin, ListView):
     """Bill vote summary list view."""
 
-    paginate_by = 15
     template_name = "bill_vote_summary_list.html"
+    form_class = SearchForm
+    specification_backends = [
+        FieldSpecificationBackend,
+        SearchSpecificationBackend,
+    ]
+    search_fields = {
+        "bill_id": int,
+        "bill_title__contains": str,
+        "sponsor_id": int,
+        "sponsor_name__contains": str,
+        "supporters": int,
+        "opposers": int,
+    }
+    paginate_by = 15
 
     def get_queryset(self):
         """Get queryset."""
         service = self.get_service()
-        bill_vote_summary = service.summarize_votes()
+        spec = self.get_specification()
+        bill_vote_summary = service.summarize_votes(spec)
         return bill_vote_summary
 
     def get_service(self) -> BillVoteSummaryService:
@@ -193,3 +228,7 @@ class BillVoteSummaryListView(ListView):
             legislator_repository=legislator_repository,
         )
         return service
+
+    def get_query_params(self) -> dict[str, Any]:
+        """Get query parameters."""
+        return BillVoteSummaryQueryParams(**self.request.GET).model_dump()

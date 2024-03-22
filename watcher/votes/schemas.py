@@ -37,8 +37,8 @@ class VoteResultQueryParams(BaseModel):
     model_config = ConfigDict(extra='ignore')
 
 
-class LegislatorVoteSummary(BaseModel):
-    """Legislator vote summary."""
+class LegislatorVoteSummaryQueryParams(BaseModel):
+    """Legislator vote summary query params."""
 
     legislator_id: list[int] | None = Field(title="Legislator ID", default=None)
     legislator_name: list[str] | None = Field(title="Legislator name", default=None)
@@ -47,8 +47,8 @@ class LegislatorVoteSummary(BaseModel):
     model_config = ConfigDict(extra='ignore')
 
 
-class BillVoteSummary(BaseModel):
-    """Bill vote summary."""
+class BillVoteSummaryQueryParams(BaseModel):
+    """Bill vote summary query params."""
 
     bill_id: list[int] | None = Field(title="Bill ID", default=None)
     bill_title: list[str] | None = Field(title="Bill title", default=None)

@@ -3,6 +3,7 @@
 import logging
 
 from watcher.core.repositories import ReadRepository
+from watcher.core.specifications import Specification
 
 from .enum import VoteType
 from .models import (
@@ -31,7 +32,9 @@ class LegislatorVoteSummaryService:
         self.vote_result_repository = vote_result_repository
         self.legislator_repository = legislator_repository
 
-    def summarize_votes(self) -> list[LegislatorVoteSummary]:
+    def summarize_votes(
+        self, spec: Specification | None = None
+    ) -> list[LegislatorVoteSummary]:
         """Summarize vote results into legislator vote summary list."""
         vote_result_list = self.vote_result_repository.get_all()
         vote_dict = self.vote_repository.get_dict()
@@ -72,6 +75,10 @@ class LegislatorVoteSummaryService:
                 supported_bills=len(supported_bills),
                 opposed_bills=len(opposed_bills),
             )
+
+            if spec and not spec.is_satisfied_by(vote_summary):
+                continue
+
             vote_summary_list.append(vote_summary)
 
         return vote_summary_list
@@ -93,7 +100,9 @@ class BillVoteSummaryService:
         self.bill_repository = bill_repository
         self.legislator_repository = legislator_repository
 
-    def summarize_votes(self) -> list[BillVoteSummary]:
+    def summarize_votes(
+        self, spec: Specification | None = None
+    ) -> list[BillVoteSummary]:
         """Summarize vote results into bill vote summary list."""
         vote_summary_dict: dict[int, BillVoteSummary] = {}
         vote_dict = self.vote_repository.get_dict()
@@ -143,5 +152,12 @@ class BillVoteSummaryService:
                 vote_summary.supporters += 1
             else:
                 vote_summary.opposers += 1
+
+        if spec:
+            return [
+                vote_summary
+                for vote_summary in vote_summary_dict.values()
+                if spec.is_satisfied_by(vote_summary)
+            ]
 
         return list(vote_summary_dict.values())
