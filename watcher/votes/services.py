@@ -23,41 +23,52 @@ class LegislatorVoteSummaryService:
     def summarize_votes(
         self,
         vote_result_repository: ReadRepository[VoteResult],
+        vote_repository: ReadRepository[Vote],
         legislator_repository: ReadRepository[Person],
     ) -> list[LegislatorVoteSummary]:
         """Summarize vote results into legislator vote summary list."""
-        vote_summary_dict: dict[int, LegislatorVoteSummary] = {}
-
         vote_result_list = vote_result_repository.get_all()
+        vote_dict = vote_repository.get_dict()
         legislator_dict = legislator_repository.get_dict()
+        legislator_vote_dict: dict[int, tuple[set[int], set[int]]] = {}
+        vote_summary_list: list[LegislatorVoteSummary] = []
 
-        for vote_result in vote_result_list:
+        for vote_result in vote_result_list:            
             try:
-                legislator = legislator_dict[vote_result.legislator_id]
-                legislator_id = legislator.id
+                vote = vote_dict[vote_result.vote_id]
+            except KeyError:
+                _LOGGER.debug("Vote not found: %s", vote_result.vote_id)
+                continue
+
+            supported_bills, opposed_bills = legislator_vote_dict.setdefault(
+                vote_result.legislator_id, (set(), set())
+            )
+
+            if vote_result.vote_type == VoteType.YES:
+                supported_bills.add(vote.bill_id)
+            else:
+                opposed_bills.add(vote.bill_id)
+
+        for legislator_id, legislator_votes in legislator_vote_dict.items():
+            try:
+                legislator = legislator_dict[legislator_id]
                 legislator_name = legislator.name
             except KeyError:
                 _LOGGER.debug(
                     "Legislator not found: %s", vote_result.legislator_id
                 )
-                legislator_id = vote_result.legislator_id
                 legislator_name = "N/A"
 
-            try:
-                vote_summary = vote_summary_dict[legislator_id]
-            except KeyError:
-                vote_summary = LegislatorVoteSummary(
-                    legislator_id=legislator_id,
-                    legislator_name=legislator_name,
-                )
-                vote_summary_dict[legislator_id] = vote_summary
+            supported_bills, opposed_bills = legislator_votes
+            vote_summary = LegislatorVoteSummary(
+                legislator_id=legislator_id,
+                legislator_name=legislator_name,
+                supported_bills=len(supported_bills),
+                opposed_bills=len(opposed_bills),
+            )
+            vote_summary_list.append(vote_summary)
 
-            if vote_result.vote_type == VoteType.YES:
-                vote_summary.supported_bills += 1
-            else:
-                vote_summary.opposed_bills += 1
-
-        return list(vote_summary_dict.values())
+        return vote_summary_list
 
 
 class BillVoteSummaryService:

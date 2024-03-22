@@ -140,6 +140,9 @@ class LegislatorVoteSummaryListView(ListView):
         vote_result_repository = VoteResultCsvRepository.using(
             file_path=settings.MEDIA_FILES["vote_results"]
         )
+        vote_repository = VoteCsvRepository.using(
+            file_path=settings.MEDIA_FILES["votes"]
+        )
         legislator_repository = LegislatorCsvRepository.using(
             file_path=settings.MEDIA_FILES["legislators"]
         )
@@ -147,6 +150,7 @@ class LegislatorVoteSummaryListView(ListView):
 
         vote_summary = service.summarize_votes(
             vote_result_repository=vote_result_repository,
+            vote_repository=vote_repository,
             legislator_repository=legislator_repository,
         )
         return vote_summary
