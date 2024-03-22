@@ -75,34 +75,32 @@ class ContainsSpecification(Specification):
         return self.value in getattr(obj, self.field)
 
 
-class AndSpecification(Specification):
+class CompositeSpecification(Specification):
+    """Composite specification."""
+
+    __slots__ = ["specs"]
+
+    def __init__(self, *specs: Specification) -> None:
+        """Initialize specification."""
+        self.specs = specs
+
+
+class AndSpecification(CompositeSpecification):
     """And specification.
 
     Specification that checks if an object satisfies all child specifications.
     """
-
-    __slots__ = ["specs"]
-
-    def __init__(self, *specs: Iterable[Specification]) -> None:
-        """Initialize specification."""
-        self.specs = specs
 
     def is_satisfied_by(self, obj: Any) -> bool:
         """Check if the given object satisfies the specification."""
         return all(spec.is_satisfied_by(obj) for spec in self.specs)
 
 
-class OrSpecification(Specification):
+class OrSpecification(CompositeSpecification):
     """Or specification.
 
     Specification that checks if an object satisfies all child specifications.
     """
-
-    __slots__ = ["specs"]
-
-    def __init__(self, *specs: Iterable[Specification]) -> None:
-        """Initialize specification."""
-        self.specs = specs
 
     def is_satisfied_by(self, obj: Any) -> bool:
         """Check if the given object satisfies the specification."""
@@ -117,7 +115,7 @@ class AtomicSpecificationBuilder(abc.ABC):
         """Build specification for a given field."""
 
 
-class FieldSpecificationBuilder(AtomicSpecificationBuilder):
+class DefaultAtomicSpecificationBuilder(AtomicSpecificationBuilder):
     """Field specification builder."""
 
     def build(self, field_name: str, value: Any) -> Specification:
@@ -134,13 +132,26 @@ class FieldSpecificationBuilder(AtomicSpecificationBuilder):
 class CompositeSpecificationBuilder(abc.ABC):
     """Composite specification builder."""
 
-    def __init__(self, spec_builder: AtomicSpecificationBuilder):
-        """Initialize composite specification builder."""
-        self.spec_builder = spec_builder
-
     @abc.abstractmethod
     def build(self, params: Mapping[str, Any]) -> Specification:
         """Build specification for a field-value mapping."""
+
+
+class DefaultCompositeSpecificationBuilder(CompositeSpecificationBuilder):
+    """Composite specification builder."""
+
+    def __init__(
+        self,
+        atomic_spec_builder: AtomicSpecificationBuilder,
+        composite_spec: CompositeSpecification,
+    ):
+        """Initialize composite specification builder."""
+        self.atomic_spec_builder = atomic_spec_builder
+        self.composite_spec = composite_spec
+
+    def build(self, params: Mapping[str, Any]) -> Specification:
+        """Build specification for a field-value mapping."""
+        return self.composite_spec(*self._iter_specs(params))
 
     def _iter_specs(
         self, params: Mapping[str, Any]
@@ -152,27 +163,13 @@ class CompositeSpecificationBuilder(abc.ABC):
 
             if isinstance(value, list):
                 for field_value in value:
-                    spec = self.spec_builder.build(field_name, field_value)
+                    spec = self.atomic_spec_builder.build(
+                        field_name, field_value
+                    )
                     yield spec
             else:
-                spec = self.spec_builder.build(field_name, value)
+                spec = self.atomic_spec_builder.build(field_name, value)
                 yield spec
-
-
-class AndSpecificationBuilder(CompositeSpecificationBuilder):
-    """And specification builder."""
-
-    def build(self, params: Mapping[str, Any]) -> Specification:
-        """Build specification for a field-value mapping."""
-        return AndSpecification(*self._iter_specs(params))
-
-
-class OrSpecificationBuilder(CompositeSpecificationBuilder):
-    """Or specification builder."""
-
-    def build(self, params: Mapping[str, Any]) -> Specification:
-        """Build specification for a field-value mapping."""
-        return OrSpecification(*self._iter_specs(params))
 
 
 class SpecificationBackend:
@@ -197,8 +194,10 @@ class FieldSpecificationBackend:
         if not params:
             return None
 
-        field_spec_builder = FieldSpecificationBuilder()
-        and_spec_builder = AndSpecificationBuilder(field_spec_builder)
+        field_spec_builder = DefaultAtomicSpecificationBuilder()
+        and_spec_builder = DefaultCompositeSpecificationBuilder(
+            field_spec_builder, AndSpecification
+        )
         return and_spec_builder.build(params)
 
 
@@ -229,8 +228,10 @@ class SearchSpecificationBackend:
                 value = self._cast_type(search, field_type)
                 field_lookup_list.append(value)
 
-        field_spec_builder = FieldSpecificationBuilder()
-        or_spec_builder = OrSpecificationBuilder(field_spec_builder)
+        field_spec_builder = DefaultAtomicSpecificationBuilder()
+        or_spec_builder = DefaultCompositeSpecificationBuilder(
+            field_spec_builder, OrSpecification
+        )
         return or_spec_builder.build(params)
 
     def _cast_type(self, value: Any, field_type: Any) -> Any:
