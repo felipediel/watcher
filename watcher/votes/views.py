@@ -5,7 +5,10 @@ from typing import Any
 from django.conf import settings
 from django.views.generic import ListView
 
-from watcher.core.specifications import AndSpecificationBuilder
+from watcher.core.specifications import (
+    FieldSpecificationBackend,
+    SearchSpecificationBackend,
+)
 from watcher.core.views import RepositoryListView
 
 from .schemas import (
@@ -28,8 +31,12 @@ class LegislatorListView(RepositoryListView):
 
     paginate_by = 15
     repository_class = LegislatorCsvRepository
-    spec_builder_class = AndSpecificationBuilder
+    specification_backends = [
+        FieldSpecificationBackend,
+        SearchSpecificationBackend,
+    ]
     template_name = "legislator_list.html"
+    search_fields = {"id": int, "name": str}
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
@@ -45,8 +52,12 @@ class BillListView(RepositoryListView):
 
     paginate_by = 15
     repository_class = BillCsvRepository
-    spec_builder_class = AndSpecificationBuilder
+    specification_backends = [
+        FieldSpecificationBackend,
+        SearchSpecificationBackend,
+    ]
     template_name = "bill_list.html"
+    search_fields = {"id": int, "title": str, "sponsor_id": int}
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
@@ -62,8 +73,12 @@ class VoteListView(RepositoryListView):
 
     paginate_by = 15
     repository_class = VoteCsvRepository
-    spec_builder_class = AndSpecificationBuilder
+    specification_backends = [
+        FieldSpecificationBackend,
+        SearchSpecificationBackend,
+    ]
     template_name = "vote_list.html"
+    search_fields = {"id": int, "bill_id": int}
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""
@@ -79,8 +94,17 @@ class VoteResultListView(RepositoryListView):
 
     paginate_by = 15
     repository_class = VoteResultCsvRepository
-    spec_builder_class = AndSpecificationBuilder
+    specification_backends = [
+        FieldSpecificationBackend,
+        SearchSpecificationBackend,
+    ]
     template_name = "vote_result_list.html"
+    search_fields = {
+        "id": int,
+        "legislator_id": int,
+        "vote_id": int,
+        "vote_type": int,
+    }
 
     def get_repository_config(self) -> dict[str, Any]:
         """Get repository config."""

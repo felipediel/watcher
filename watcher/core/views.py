@@ -6,14 +6,19 @@ from django.core.exceptions import ImproperlyConfigured
 from django.views.generic import ListView
 
 from .repositories import ReadRepository
-from .specifications import Specification, SpecificationBuilder
+from .specifications import (
+    AndSpecification,
+    Specification,
+    SpecificationBackend,
+)
+from .typing import ObjectOrType
 
 
 class RepositoryListView(ListView):
     """Repository list view."""
 
     repository_class: type[ReadRepository]
-    spec_builder_class: type[SpecificationBuilder] | None = None
+    specification_backends: list[ObjectOrType[SpecificationBackend]] = None
 
     def get_queryset(self):
         """Get queryset."""
@@ -35,18 +40,24 @@ class RepositoryListView(ListView):
         """Get repository config."""
         return {}
 
-    def get_query_params(self) -> dict[str, Any]:
-        """Get query parameters."""
-        return {}
-
     def get_specification(self) -> Specification | None:
         """Get specification."""
-        if not self.spec_builder_class:
+        if not self.specification_backends:
             return None
 
-        query_params = self.get_query_params()
-        if not query_params:
+        specs: list[Specification] = []
+        for backend in self.specification_backends:
+            if callable(backend):
+                backend = backend()
+
+            spec = backend.build(self.request, self)
+            if spec:
+                specs.append(spec)
+
+        if not specs:
             return None
 
-        spec_builder = self.spec_builder_class()
-        return spec_builder.build(query_params)
+        if len(specs) > 1:
+            return AndSpecification(*specs)
+
+        return specs[0]
