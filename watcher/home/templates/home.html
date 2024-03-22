@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+  <div class="p-4 p-md-5 mt-4 mb-4 rounded text-body-emphasis bg-body-secondary">
+    <div class="col-lg-6 px-0">
+      <h1 class="display-4 fst-italic">Watcher</h1>
+      <p class="lead my-3">
+        Learn, understand, and respond to emerging updates in federal, state, and EU governments with ease. Watcher's
+        legislative tracking software enables you to be the first to know about new legislative updates, understand
+        their impact, and implement effective strategies across state and federal legislation.
+      </p>
+    </div>
+  </div>
+
+  <div class="row mb-2">
+    <div class="col-md-6">
+      <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <strong class="d-inline-block mb-2 text-primary-emphasis">Summaries</strong>
+          <h3 class="mb-0">Legislators Vote Summary</h3>
+          <div class="mb-1 text-body-secondary">Mar 24</div>
+          <p class="card-text mb-auto">
+            Insights into the number of bills each legislator has supported and opposed,
+            allowing users to gauge their legislative activity.</p>
+          <a href="{% url 'votes:bill-vote-summary-list' %}" class="icon-link gap-1 icon-link-hover stretched-link">
+            View Details
+            <svg class="bi">
+              <use xlink:href="#chevron-right" />
+            </svg>
+          </a>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+          <img
+            src="{% static 'watcher/img/library-of-congress-RShxKedLhmc-unsplash.jpg' %}"
+            width="200"
+            height="250"
+            class="object-fit-cover"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <strong class="d-inline-block mb-2 text-primary-emphasis">Summaries</strong>
+          <h3 class="mb-0">Bills Vote Summary</h3>
+          <div class="mb-1 text-body-secondary">Mar 24</div>
+          <p class="mb-auto">
+            Essential data regarding the number of legislators who supported or opposed each bill, along with
+            identifying the primary sponsor of the bill.
+          </p>
+          <a href="{% url 'votes:bill-vote-summary-list' %}" class="icon-link gap-1 icon-link-hover stretched-link">
+            View Details
+            <svg class="bi">
+              <use xlink:href="#chevron-right" />
+            </svg>
+          </a>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+          <img
+            src="{% static 'watcher/img/kyle-glenn-TELAb4duebI-unsplash.jpg' %}"
+            width="200"
+            height="250"
+            class="object-fit-cover"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

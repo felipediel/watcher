@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand" href="#">Watcher</a>
+    <a class="navbar-brand" href="/">Watcher</a>
     <button
       class="navbar-toggler"
       type="button"
@@ -27,8 +27,8 @@
             Summaries
           </a>
           <ul class="dropdown-menu" aria-labelledby="topNavSummaryDropdown">
-            <li><a class="dropdown-item" href="/summaries/bills_votes/">Bills Vote Summary</a></li>
-            <li><a class="dropdown-item" href="/summaries/legislators_votes/">Legislators Vote Summary</a></li>
+            <li><a class="dropdown-item" href="{% url 'votes:bill-vote-summary-list' %}">Bills Vote Summary</a></li>
+            <li><a class="dropdown-item" href="{% url 'votes:legislator-vote-summary-list' %}">Legislators Vote Summary</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -44,10 +44,10 @@
             Datasets
           </a>
           <ul class="dropdown-menu" aria-labelledby="topNavDatasetDropdown">
-            <li><a class="dropdown-item" href="/datasets/votes/">Votes</a></li>
-            <li><a class="dropdown-item" href="/datasets/vote_results/">Vote Results</a></li>
-            <li><a class="dropdown-item" href="/datasets/legislators/">Legislators</a></li>
-            <li><a class="dropdown-item" href="/datasets/bills/">Bills</a></li>
+            <li><a class="dropdown-item" href="{% url 'votes:vote-list' %}">Votes</a></li>
+            <li><a class="dropdown-item" href="{% url 'votes:vote-result-list' %}">Vote Results</a></li>
+            <li><a class="dropdown-item" href="{% url 'votes:legislator-list' %}">Legislators</a></li>
+            <li><a class="dropdown-item" href="{% url 'votes:bill-list' %}">Bills</a></li>
             <li class="dropdown-divider"></li>
             <li class="dropdown-item" href="#">Download all</li>
           </ul>
