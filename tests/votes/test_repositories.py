@@ -38,12 +38,10 @@ class TestLegislatorCsvRepository(BaseTestCase):
         """Test iter items."""
         items = self.repository.iter_items()
 
-        item1 = next(items)
-        self.assertAttrEqual(item1, "id", 904789)
+        item1 = self.getItemFromList(items, "id", 904789)
         self.assertAttrEqual(item1, "name", "Rep. Don Bacon (R-NE-2)")
 
-        item2 = next(items)
-        self.assertAttrEqual(item2, "id", 1603850)
+        item2 = self.getItemFromList(items, "id", 1603850)
         self.assertAttrEqual(item2, "name", "Rep. Jamaal Bowman (D-NY-16)")
 
     def test_get_all(self):
@@ -105,13 +103,11 @@ class TestBillCsvRepository(BaseTestCase):
         """Test iter items."""
         items = self.repository.iter_items()
 
-        item1 = next(items)
-        self.assertAttrEqual(item1, "id", 2952375)
+        item1 = self.getItemFromList(items, "id", 2952375)
         self.assertAttrEqual(item1, "title", "H.R. 5376: Build Back Better Act")
         self.assertAttrEqual(item1, "sponsor_id", 412211)
 
-        item2 = next(items)
-        self.assertAttrEqual(item2, "id", 2900994)
+        item2 = self.getItemFromList(items, "id", 2900994)
         self.assertAttrEqual(item2, "title", "H.R. 3684: Infrastructure Investment and Jobs Act")
         self.assertAttrEqual(item2, "sponsor_id", 400100)
 
@@ -176,12 +172,10 @@ class TestVoteCsvRepository(BaseTestCase):
         """Test iter items."""
         items = self.repository.iter_items()
 
-        item1 = next(items)
-        self.assertAttrEqual(item1, "id", 3314452)
+        item1 = self.getItemFromList(items, "id", 3314452)
         self.assertAttrEqual(item1, "bill_id", 2900994)
 
-        item2 = next(items)
-        self.assertAttrEqual(item2, "id", 3321166)
+        item2 = self.getItemFromList(items, "id", 3321166)
         self.assertAttrEqual(item2, "bill_id", 2952375)
 
     def test_get_all(self):
@@ -245,14 +239,12 @@ class TestVoteResultCsvRepository(BaseTestCase):
         """Test iter items."""
         items = self.repository.iter_items()
 
-        item1 = next(items)
-        self.assertAttrEqual(item1, "id", 92516553)
+        item1 = self.getItemFromList(items, "id", 92516553)
         self.assertAttrEqual(item1, "legislator_id", 1269790)
         self.assertAttrEqual(item1, "vote_id", 3321166)
         self.assertAttrEqual(item1, "vote_type", 1)
 
-        item2 = next(items)
-        self.assertAttrEqual(item2, "id", 92516784)
+        item2 = self.getItemFromList(items, "id", 92516784)
         self.assertAttrEqual(item2, "legislator_id", 400440)
         self.assertAttrEqual(item2, "vote_id", 3321166)
         self.assertAttrEqual(item2, "vote_type", 2)
@@ -264,14 +256,13 @@ class TestVoteResultCsvRepository(BaseTestCase):
         self.assertIsInstance(items, list)
         self.assertEqual(len(items), 2)
 
-        item1 = items[0]
+        item1 = self.getItemFromList(items, "id", 92516553)
         self.assertAttrEqual(item1, "id", 92516553)
         self.assertAttrEqual(item1, "legislator_id", 1269790)
         self.assertAttrEqual(item1, "vote_id", 3321166)
         self.assertAttrEqual(item1, "vote_type", 1)
 
-        item2 = items[1]
-        self.assertAttrEqual(item2, "id", 92516784)
+        item2 = self.getItemFromList(items, "id", 92516784)
         self.assertAttrEqual(item2, "legislator_id", 400440)
         self.assertAttrEqual(item2, "vote_id", 3321166)
         self.assertAttrEqual(item2, "vote_type", 2)

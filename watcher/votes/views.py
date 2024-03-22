@@ -137,6 +137,12 @@ class LegislatorVoteSummaryListView(ListView):
 
     def get_queryset(self):
         """Get queryset."""
+        service = self.get_service()
+        vote_summary = service.summarize_votes()
+        return vote_summary
+
+    def get_service(self) -> LegislatorVoteSummaryService:
+        """Get service."""
         vote_result_repository = VoteResultCsvRepository.using(
             file_path=settings.MEDIA_FILES["vote_results"]
         )
@@ -151,8 +157,7 @@ class LegislatorVoteSummaryListView(ListView):
             vote_result_repository=vote_result_repository,
             legislator_repository=legislator_repository,
         )
-        vote_summary = service.summarize_votes()
-        return vote_summary
+        return service
 
 
 class BillVoteSummaryListView(ListView):
@@ -163,6 +168,12 @@ class BillVoteSummaryListView(ListView):
 
     def get_queryset(self):
         """Get queryset."""
+        service = self.get_service()
+        bill_vote_summary = service.summarize_votes()
+        return bill_vote_summary
+
+    def get_service(self) -> BillVoteSummaryService:
+        """Get service."""
         vote_repository = VoteCsvRepository.using(
             file_path=settings.MEDIA_FILES["votes"]
         )
@@ -181,5 +192,4 @@ class BillVoteSummaryListView(ListView):
             bill_repository=bill_repository,
             legislator_repository=legislator_repository,
         )
-        bill_vote_summary = service.summarize_votes()
-        return bill_vote_summary
+        return service

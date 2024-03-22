@@ -40,38 +40,22 @@ class TestLegislatorVoteSummaryService(BaseTestCase):
 
     def test_summarize_votes(self):
         """Test summarize votes."""
-        vote_summary_list = self.vote_summary_service.summarize_votes()
+        object_list = self.vote_summary_service.summarize_votes()
 
-        self.assertIsInstance(vote_summary_list, list)
-        self.assertEqual(len(vote_summary_list), 3)
+        self.assertIsInstance(object_list, list)
+        self.assertEqual(len(object_list), 3)
 
-        find_item = (
-            item
-            for item in vote_summary_list
-            if getattr(item, "legislator_id") == 400440
-        )
-        item1 = next(find_item, None)
-        self.assertIsNotNone(item1)
+        item1 = self.getItemFromList(object_list, "legislator_id", 400440)
         self.assertAttrEqual(item1, "legislator_name", "Rep. Don Young (R-AK-1)")
         self.assertAttrEqual(item1, "supported_bills", 1)
         self.assertAttrEqual(item1, "opposed_bills", 2)
 
-        find_item = (
-            item
-            for item in vote_summary_list
-            if getattr(item, "legislator_id") == 412393
-        )
-        item2 = next(find_item, None)
+        item2 = self.getItemFromList(object_list, "legislator_id", 412393)
         self.assertAttrEqual(item2, "legislator_name", "Rep. Tom Reed (R-NY-23)")
         self.assertAttrEqual(item2, "supported_bills", 0)
         self.assertAttrEqual(item2, "opposed_bills", 3)
 
-        find_item = (
-            item
-            for item in vote_summary_list
-            if getattr(item, "legislator_id") == 412421
-        )
-        item3 = next(find_item, None)
+        item3 = self.getItemFromList(object_list, "legislator_id", 412421)
         self.assertAttrEqual(item3, "legislator_name", "Rep. Adam Kinzinger (R-IL-16)")
         self.assertAttrEqual(item3, "supported_bills", 2)
         self.assertAttrEqual(item3, "opposed_bills", 0)
@@ -102,17 +86,12 @@ class TestBillVoteSummaryService(BaseTestCase):
 
     def test_summarize_votes(self):
         """Test summarize votes."""
-        vote_summary_list = self.vote_summary_service.summarize_votes()
+        object_list = self.vote_summary_service.summarize_votes()
 
-        self.assertIsInstance(vote_summary_list, list)
-        self.assertEqual(len(vote_summary_list), 3)
+        self.assertIsInstance(object_list, list)
+        self.assertEqual(len(object_list), 3)
 
-        find_item = (
-            item
-            for item in vote_summary_list
-            if getattr(item, "bill_id") == 2952375
-        )
-        item1 = next(find_item, None)
+        item1 = self.getItemFromList(object_list, "bill_id", 2952375)
         self.assertIsNotNone(item1)
         self.assertAttrEqual(item1, "bill_title", "H.R. 5376: Build Back Better Act")
         self.assertAttrEqual(item1, "sponsor_id", 412211)
@@ -120,12 +99,7 @@ class TestBillVoteSummaryService(BaseTestCase):
         self.assertAttrEqual(item1, "supporters", 2)
         self.assertAttrEqual(item1, "opposers", 1)
 
-        find_item = (
-            item
-            for item in vote_summary_list
-            if getattr(item, "bill_id") == 2900994
-        )
-        item2 = next(find_item, None)
+        item2 = self.getItemFromList(object_list, "bill_id", 2900994)
         self.assertIsNotNone(item2)
         self.assertAttrEqual(item2, "bill_title", "H.R. 3684: Infrastructure Investment and Jobs Act")
         self.assertAttrEqual(item2, "sponsor_id", 400100)
@@ -133,12 +107,7 @@ class TestBillVoteSummaryService(BaseTestCase):
         self.assertAttrEqual(item2, "supporters", 2)
         self.assertAttrEqual(item2, "opposers", 3)
 
-        find_item = (
-            item
-            for item in vote_summary_list
-            if getattr(item, "bill_id") == 3568720
-        )
-        item3 = next(find_item, None)
+        item3 = self.getItemFromList(object_list, "bill_id", 3568720)
         self.assertIsNotNone(item3)
         self.assertAttrEqual(item3, "bill_title", "H.R. 7623: Telehealth Modernization Act of 2024")
         self.assertAttrEqual(item3, "sponsor_id", 17941)

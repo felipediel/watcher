@@ -7,10 +7,23 @@ from django.template.response import TemplateResponse
 from watcher.core.repositories import ReadRepository
 from watcher.votes.enum import VoteType
 
-from watcher.votes.models import Bill, Person, Vote, VoteResult
+from watcher.votes.models import (
+    Bill,
+    BillVoteSummary,
+    LegislatorVoteSummary,
+    Person,
+    Vote,
+    VoteResult,
+)
+from watcher.votes.services import (
+    BillVoteSummaryService,
+    LegislatorVoteSummaryService,
+)
 from watcher.votes.views import (
     BillListView,
+    BillVoteSummaryListView,
     LegislatorListView,
+    LegislatorVoteSummaryListView,
     VoteListView,
     VoteResultListView,
 )
@@ -51,12 +64,10 @@ class TestLegislatorListView(BaseTestCase):
         self.assertIsInstance(object_list, list)
         self.assertEqual(len(object_list), 2)
 
-        item1 = object_list[0]
-        self.assertAttrEqual(item1, "id", 904789)
+        item1 = self.getItemFromList(object_list, "id", 904789)
         self.assertAttrEqual(item1, "name", "Rep. Don Bacon (R-NE-2)")
 
-        item2 = object_list[1]
-        self.assertAttrEqual(item2, "id", 1603850)
+        item2 = self.getItemFromList(object_list, "id", 1603850)
         self.assertAttrEqual(item2, "name", "Rep. Jamaal Bowman (D-NY-16)")
 
 
@@ -101,15 +112,13 @@ class TestBillListView(BaseTestCase):
         self.assertIsInstance(object_list, list)
         self.assertEqual(len(object_list), 2)
 
-        item1 = object_list[0]
-        self.assertAttrEqual(item1, "id", 2952375)
+        item1 = self.getItemFromList(object_list, "id", 2952375)
         self.assertAttrEqual(
             item1, "title", "H.R. 5376: Build Back Better Act"
         )
         self.assertAttrEqual(item1, "sponsor_id", 412211)
 
-        item2 = object_list[1]
-        self.assertAttrEqual(item2, "id", 2900994)
+        item2 = self.getItemFromList(object_list, "id", 2900994)
         self.assertAttrEqual(
             item2, "title", "H.R. 3684: Infrastructure Investment and Jobs Act"
         )
@@ -149,12 +158,10 @@ class TestVoteListView(BaseTestCase):
         self.assertIsInstance(object_list, list)
         self.assertEqual(len(object_list), 2)
 
-        item1 = object_list[0]
-        self.assertAttrEqual(item1, "id", 3314452)
+        item1 = self.getItemFromList(object_list, "id", 3314452)
         self.assertAttrEqual(item1, "bill_id", 2900994)
 
-        item2 = object_list[1]
-        self.assertAttrEqual(item2, "id", 3321166)
+        item2 = self.getItemFromList(object_list, "id", 3321166)
         self.assertAttrEqual(item2, "bill_id", 2952375)
 
 
@@ -201,14 +208,130 @@ class TestVoteResultListView(BaseTestCase):
         self.assertIsInstance(object_list, list)
         self.assertEqual(len(object_list), 2)
 
-        item1 = object_list[0]
-        self.assertAttrEqual(item1, "id", 92516553)
+        item1 = self.getItemFromList(object_list, "id", 92516553)
         self.assertAttrEqual(item1, "legislator_id", 1269790)
         self.assertAttrEqual(item1, "vote_id", 3321166)
         self.assertAttrEqual(item1, "vote_type", VoteType(1))
 
-        item2 = object_list[1]
-        self.assertAttrEqual(item2, "id", 92516784)
+        item2 = self.getItemFromList(object_list, "id", 92516784)
         self.assertAttrEqual(item2, "legislator_id", 400440)
         self.assertAttrEqual(item2, "vote_id", 3321166)
         self.assertAttrEqual(item2, "vote_type", VoteType(2))
+
+
+class TestLegislatorVoteSummaryListView(BaseTestCase):
+    """Tests for legislator vote summary list view."""
+
+    view_name = "votes:legislator-vote-summary-list"
+
+    def service(self, mock_service: mock.MagicMock):
+        """Patch service object."""
+        return mock.patch.object(
+            LegislatorVoteSummaryListView,
+            "get_service",
+            return_value=mock_service,
+        )
+
+    def test_list_vote_summaries(self):
+        """Test list vote summaries."""
+        mock_service_class = mock.MagicMock(spec=LegislatorVoteSummaryService)
+        mock_service = mock_service_class.return_value
+        mock_service.summarize_votes.return_value = [
+            LegislatorVoteSummary(
+                legislator_id=400440,
+                legislator_name="Rep. Don Young (R-AK-1)",
+                supported_bills=1,
+                opposed_bills=2,
+            ),
+            LegislatorVoteSummary(
+                legislator_id=412393,
+                legislator_name="Rep. Tom Reed (R-NY-23)",
+                supported_bills=0,
+                opposed_bills=3,
+            ),
+        ]
+        with self.service(mock_service):
+            response = self.client.get(reverse(self.view_name))
+
+        mock_service.summarize_votes.assert_called_once()
+
+        assert isinstance(response, TemplateResponse)
+        context = response.context
+
+        self.assertIn("object_list", context)
+        object_list = context["object_list"]
+        self.assertIsInstance(object_list, list)
+        self.assertEqual(len(object_list), 2)
+
+        item1 = self.getItemFromList(object_list, "legislator_id", 400440)
+        self.assertAttrEqual(item1, "legislator_name", "Rep. Don Young (R-AK-1)")
+        self.assertAttrEqual(item1, "supported_bills", 1)
+        self.assertAttrEqual(item1, "opposed_bills", 2)
+
+        item2 = self.getItemFromList(object_list, "legislator_id", 412393)
+        self.assertAttrEqual(item2, "legislator_name", "Rep. Tom Reed (R-NY-23)")
+        self.assertAttrEqual(item2, "supported_bills", 0)
+        self.assertAttrEqual(item2, "opposed_bills", 3)
+
+
+class TestBillVoteSummaryListView(BaseTestCase):
+    """Tests for bill vote summary list view."""
+
+    view_name = "votes:bill-vote-summary-list"
+
+    def service(self, mock_service: mock.MagicMock):
+        """Patch service object."""
+        return mock.patch.object(
+            BillVoteSummaryListView,
+            "get_service",
+            return_value=mock_service,
+        )
+
+    def test_list_vote_summaries(self):
+        """Test list vote summaries."""
+        mock_service_class = mock.MagicMock(spec=BillVoteSummaryService)
+        mock_service = mock_service_class.return_value
+        mock_service.summarize_votes.return_value = [
+            BillVoteSummary(
+                bill_id=2952375,
+                bill_title="H.R. 5376: Build Back Better Act",
+                sponsor_id=412211,
+                sponsor_name="Rep. John Yarmuth (D-KY-3)",
+                supporters=2,
+                opposers=1,
+            ),
+            BillVoteSummary(
+                bill_id=2900994,
+                bill_title="H.R. 3684: Infrastructure Investment and Jobs Act",
+                sponsor_id=400100,
+                sponsor_name= "N/A",
+                supporters=2,
+                opposers=3,
+            ),
+        ]
+        with self.service(mock_service):
+            response = self.client.get(reverse(self.view_name))
+
+        mock_service.summarize_votes.assert_called_once()
+
+        assert isinstance(response, TemplateResponse)
+        context = response.context
+
+        self.assertIn("object_list", context)
+        object_list = context["object_list"]
+        self.assertIsInstance(object_list, list)
+        self.assertEqual(len(object_list), 2)
+
+        item1 = self.getItemFromList(object_list, "bill_id", 2952375)
+        self.assertAttrEqual(item1, "bill_title", "H.R. 5376: Build Back Better Act")
+        self.assertAttrEqual(item1, "sponsor_id", 412211)
+        self.assertAttrEqual(item1, "sponsor_name", "Rep. John Yarmuth (D-KY-3)")
+        self.assertAttrEqual(item1, "supporters", 2)
+        self.assertAttrEqual(item1, "opposers", 1)
+
+        item2 = self.getItemFromList(object_list, "bill_id", 2900994)
+        self.assertAttrEqual(item2, "bill_title", "H.R. 3684: Infrastructure Investment and Jobs Act")
+        self.assertAttrEqual(item2, "sponsor_id", 400100)
+        self.assertAttrEqual(item2, "sponsor_name", "N/A")
+        self.assertAttrEqual(item2, "supporters", 2)
+        self.assertAttrEqual(item2, "opposers", 3)
