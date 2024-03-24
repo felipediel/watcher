@@ -17,7 +17,9 @@ from .typing import ObjectOrType
 class SpecificationMixin:
     """Specification mixin class."""
 
-    specification_backends: list[ObjectOrType[SpecificationBackend]] = None
+    specification_backends: list[ObjectOrType[SpecificationBackend]] | None = (
+        None
+    )
 
     def get_specification(self) -> Specification | None:
         """Get specification."""
@@ -29,7 +31,7 @@ class SpecificationMixin:
             if callable(backend):
                 backend = backend()
 
-            spec = backend.build(self.request, self)
+            spec = backend.build(self.request, self)  # type: ignore
             if spec:
                 specs.append(spec)
 

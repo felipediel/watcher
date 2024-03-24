@@ -63,9 +63,7 @@ class LegislatorVoteSummaryService:
                 legislator = legislator_dict[legislator_id]
                 legislator_name = legislator.name
             except KeyError:
-                _LOGGER.debug(
-                    "Legislator not found: %s", vote_result.legislator_id
-                )
+                _LOGGER.debug("Legislator not found: %s", legislator_id)
                 legislator_name = "N/A"
 
             supported_bills, opposed_bills = legislator_votes

@@ -180,7 +180,7 @@ class SpecificationBackend:
         """Build specification for a request."""
 
 
-class FieldSpecificationBackend:
+class FieldSpecificationBackend(SpecificationBackend):
     """Field specification backend."""
 
     def build(self, request: HttpRequest, view: View) -> Specification | None:
@@ -203,7 +203,7 @@ class FieldSpecificationBackend:
         return and_spec_builder.build(params)
 
 
-class SearchSpecificationBackend:
+class SearchSpecificationBackend(SpecificationBackend):
     """Search specification backend."""
 
     def build(self, request: HttpRequest, view: View) -> Specification | None:
