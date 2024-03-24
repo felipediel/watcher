@@ -258,6 +258,8 @@ class DownloadAllView(View):
                     zf.writestr(os.path.basename(filename), file.read())
 
         stream.seek(0)
-        response = FileResponse(stream, content_type='application/zip')
-        response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+        response = FileResponse(stream, content_type="application/zip")
+        response["Content-Disposition"] = (
+            f'attachment; filename="{zip_filename}"'
+        )
         return response
