@@ -16,7 +16,7 @@ from .typing import ObjectOrType
 
 class SpecificationMixin:
     """Specification mixin class."""
-    
+
     specification_backends: list[ObjectOrType[SpecificationBackend]] = None
 
     def get_specification(self) -> Specification | None:

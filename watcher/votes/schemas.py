@@ -17,8 +17,8 @@ class BillQueryParams(BaseModel):
     title: list[str] | None = Field(title="Title", default=None)
     sponsor_id: list[int] | None = Field(title="Sponsor ID", default=None)
     model_config = ConfigDict(extra='ignore')
- 
- 
+
+
 class VoteQueryParams(BaseModel):
     """Vote query params."""
 

@@ -143,15 +143,15 @@ class DefaultCompositeSpecificationBuilder(CompositeSpecificationBuilder):
     def __init__(
         self,
         atomic_spec_builder: AtomicSpecificationBuilder,
-        composite_spec: CompositeSpecification,
+        composite_spec_class: type[CompositeSpecification],
     ):
         """Initialize composite specification builder."""
         self.atomic_spec_builder = atomic_spec_builder
-        self.composite_spec = composite_spec
+        self.composite_spec_class = composite_spec_class
 
     def build(self, params: Mapping[str, Any]) -> Specification:
         """Build specification for a field-value mapping."""
-        return self.composite_spec(*self._iter_specs(params))
+        return self.composite_spec_class(*self._iter_specs(params))
 
     def _iter_specs(
         self, params: Mapping[str, Any]
@@ -173,6 +173,7 @@ class DefaultCompositeSpecificationBuilder(CompositeSpecificationBuilder):
 
 
 class SpecificationBackend:
+    """Specification backend."""
 
     @abc.abstractmethod
     def build(self, request: HttpRequest, view: View) -> Specification:
@@ -182,15 +183,16 @@ class SpecificationBackend:
 class FieldSpecificationBackend:
     """Field specification backend."""
 
-    def build(self, request: HttpRequest, view: View) -> Specification:
+    def build(self, request: HttpRequest, view: View) -> Specification | None:
         """Build specification for a request."""
-        if not hasattr(view, "get_query_params"):
+        get_query_params_fn = getattr(view, "get_query_params", None)
+        if not get_query_params_fn or not callable(get_query_params_fn):
             raise ImproperlyConfigured(
                 "FieldSpecificationBackend requires a 'get_query_params' "
                 "method defined in the view class."
             )
 
-        params = view.get_query_params()
+        params = get_query_params_fn()
         if not params:
             return None
 
@@ -203,8 +205,8 @@ class FieldSpecificationBackend:
 
 class SearchSpecificationBackend:
     """Search specification backend."""
-    
-    def build(self, request: HttpRequest, view: View) -> Specification:
+
+    def build(self, request: HttpRequest, view: View) -> Specification | None:
         """Build specification for a request."""
         search_fields = getattr(view, "search_fields", None)
         if not search_fields:

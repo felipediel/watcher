@@ -17,6 +17,7 @@ class BaseTestCase(SimpleTestCase):
         )
 
     def getItemFromList(self, obj, attr, value):  # pylint: disable=C0103
+        """Get item from list."""
         try:
             return next(
                 item
@@ -25,5 +26,5 @@ class BaseTestCase(SimpleTestCase):
             )
         except (AttributeError, StopIteration):
             self.fail(
-                f"{obj} does not have item with attribute '{attr}' == {value}"
+                f"{obj} does not have an item with '{attr}' == {value}"
             )

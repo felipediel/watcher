@@ -304,7 +304,7 @@ class TestBillVoteSummaryListView(BaseTestCase):
                 bill_id=2900994,
                 bill_title="H.R. 3684: Infrastructure Investment and Jobs Act",
                 sponsor_id=400100,
-                sponsor_name= "N/A",
+                sponsor_name="N/A",
                 supporters=2,
                 opposers=3,
             ),

@@ -42,7 +42,7 @@ class LegislatorVoteSummaryService:
         legislator_vote_dict: dict[int, tuple[set[int], set[int]]] = {}
         vote_summary_list: list[LegislatorVoteSummary] = []
 
-        for vote_result in vote_result_list:            
+        for vote_result in vote_result_list:
             try:
                 vote = vote_dict[vote_result.vote_id]
             except KeyError:
