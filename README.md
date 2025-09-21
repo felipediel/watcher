@@ -15,7 +15,7 @@ $ pip install -r requirements.txt
 
 2. Run the application:
 ```bash
-$ python manage.py run
+$ python manage.py runserver
 ```
 
 ### Option 2: Building a Docker Image of the Application
@@ -28,7 +28,7 @@ $ docker build -t watcher .
 
 2. Run the application:
 ```bash
-$ docker run watcher python manage.py run
+$ docker run -p 8000:8000 watcher
 ```
 
 ## 2. Accessing the Shell Inside the Container
